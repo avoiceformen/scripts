@@ -1,0 +1,107 @@
+#!/bin/bash
+
+#
+# Robert Brockway
+#
+# Turn off the internal display on proxima
+#
+# 3 November 2024
+#
+# $1: 'on' or 'off'
+#
+
+#
+# Functions
+#
+
+initialise()
+{
+	# Config
+	INTDISP=eDP-1
+
+	# Source AVfM functions
+	source /usr/local/lib/avfmFunctions
+
+	avfmInit
+
+	COMMANDS="xrandr"
+	checkCommands
+}
+
+setMode()
+{
+	case $MODE in
+	off)
+		turnOff
+		;;
+	on)
+		turnOn
+		;;
+	*)
+		error 50
+		;;
+	esac
+}
+
+turnOff()
+{
+	echo "Turning off display $INTDISP in 5 seconds"
+	sleep 5
+	case $? in
+	0)
+		true
+		;;
+	*)
+		error 60
+		;;
+	esac
+
+	xrandr --output $INTDISP --off
+	case $? in
+	0)
+		true
+		;;
+	*)
+		error 61
+		;;
+	esac
+}
+
+turnOn()
+{
+	echo "Turning on display $INTDISP"
+	xrandr --output $INTDISP --mode 1920x1080
+	case $? in
+	0)
+		true
+		;;
+	*)
+		error 71
+		;;
+	esac
+}
+
+#
+# Main
+#
+
+initialise
+
+case ${1-""} in
+"")
+	echo "Please specify a mode, 'on' or 'off'"
+	error 10
+	;;
+on)
+	MODE=on
+	;;
+off)
+	MODE=off
+	;;
+*)
+	echo "Please specify a valid mode, 'on' or 'off'"
+	error 11
+	;;
+esac
+
+setMode
